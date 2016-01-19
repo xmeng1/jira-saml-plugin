@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Principal;
+import java.net.URI;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -52,6 +53,32 @@ public class SsoLoginServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+
+		String refererURL = request.getHeader("Referer");
+		String os_destination = null;
+		if (refererURL != null) {
+			try{
+				URI url = new URI(refererURL);
+				String queryString = url.getRawQuery();
+				if (queryString != null){
+					String[] params = queryString.split("&");
+					for (String param: params) {
+						String key = param.substring(0, param.indexOf('='));
+						if (key.equals("os_destination")){
+							String val = param.substring(param.indexOf('=') + 1);
+							os_destination = java.net.URLDecoder.decode(val, "UTF-8");
+						}
+					}
+				}
+			}
+			catch (java.net.URISyntaxException urs){
+			}
+		}
+
+		if (os_destination != null) {
+			request.getSession().setAttribute("os_destination", os_destination);
+		}
+
 		try {
 			SAMLContext context = new SAMLContext(request, saml2Config);
 			SAMLMessageContext messageContext = context.createSamlMessageContext(request, response);
@@ -132,10 +159,17 @@ public class SsoLoginServlet extends HttpServlet {
 		    	authUserMethod.setAccessible(true);
 		    	Boolean result = (Boolean)authUserMethod.invoke(authenticator, new Object[]{request, response, principal});
 
-		        if (result) {
-		        	response.sendRedirect(saml2Config.getBaseUrl() + "/secure/Dashboard.jspa");
-		        	return;
-		        }
+				// If User has accessed specific protected URL, then we should honor that request.
+				// os_destination parameter will help us here to do exactly same!
+				if (result) {
+					if(request.getSession() != null && request.getSession().getAttribute("os_destination") != null) {
+						String os_destination = request.getSession().getAttribute("os_destination").toString();
+						response.sendRedirect(os_destination);
+					} else {
+						response.sendRedirect(saml2Config.getBaseUrl() + "/secure/Dashboard.jspa");
+					}
+					return;
+				}
 		    }
 		}
 
