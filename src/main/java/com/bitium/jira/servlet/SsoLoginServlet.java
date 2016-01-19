@@ -1,43 +1,39 @@
 package com.bitium.jira.servlet;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.security.Principal;
-import java.net.URI;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.atlassian.jira.exception.CreateException;
-import com.atlassian.jira.exception.PermissionException;
-import com.atlassian.jira.user.ApplicationUser;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.opensaml.xml.schema.XSAny;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.saml.SAMLCredential;
-import org.springframework.security.saml.context.SAMLMessageContext;
-import org.springframework.security.saml.util.SAMLUtil;
-import org.springframework.security.saml.websso.WebSSOProfile;
-import org.springframework.security.saml.websso.WebSSOProfileConsumer;
-import org.springframework.security.saml.websso.WebSSOProfileConsumerImpl;
-import org.springframework.security.saml.websso.WebSSOProfileImpl;
-import org.springframework.security.saml.websso.WebSSOProfileOptions;
 
 import com.atlassian.jira.component.ComponentAccessor;
-import com.atlassian.jira.user.util.UserUtil;
+import com.atlassian.jira.exception.CreateException;
+import com.atlassian.jira.exception.PermissionException;
 import com.atlassian.jira.user.DelegatingApplicationUser;
+import com.atlassian.jira.user.util.UserUtil;
 import com.atlassian.seraph.auth.Authenticator;
 import com.atlassian.seraph.auth.DefaultAuthenticator;
 import com.atlassian.seraph.config.SecurityConfigFactory;
 import com.bitium.jira.config.SAMLJiraConfig;
 import com.bitium.saml.SAMLContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.saml.SAMLCredential;
+import org.springframework.security.saml.context.SAMLMessageContext;
+import org.springframework.security.saml.util.SAMLUtil;
+import org.springframework.security.saml.websso.*;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.security.Principal;
 
 
 public class SsoLoginServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+
+	public static final String OS_DESTINATION_KEY = "os_destination";
 
 	private Log log = LogFactory.getLog(SsoLoginServlet.class);
 
@@ -54,30 +50,7 @@ public class SsoLoginServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		String refererURL = request.getHeader("Referer");
-		String os_destination = null;
-		if (refererURL != null) {
-			try{
-				URI url = new URI(refererURL);
-				String queryString = url.getRawQuery();
-				if (queryString != null){
-					String[] params = queryString.split("&");
-					for (String param: params) {
-						String key = param.substring(0, param.indexOf('='));
-						if (key.equals("os_destination")){
-							String val = param.substring(param.indexOf('=') + 1);
-							os_destination = java.net.URLDecoder.decode(val, "UTF-8");
-						}
-					}
-				}
-			}
-			catch (java.net.URISyntaxException urs){
-			}
-		}
-
-		if (os_destination != null) {
-			request.getSession().setAttribute("os_destination", os_destination);
-		}
+		storeRedirectDestinationInSession(request);
 
 		try {
 			SAMLContext context = new SAMLContext(request, saml2Config);
@@ -94,6 +67,33 @@ public class SsoLoginServlet extends HttpServlet {
 		} catch (Exception e) {
 		    log.error("saml plugin error + " + e.getMessage());
 			response.sendRedirect(saml2Config.getBaseUrl() + "/login.jsp?samlerror=general");
+		}
+	}
+
+	private void storeRedirectDestinationInSession(HttpServletRequest request) throws UnsupportedEncodingException {
+		String refererURL = request.getHeader("Referer");
+		String osDestination = null;
+		if (refererURL != null) {
+			try{
+				URI url = new URI(refererURL);
+				String queryString = url.getRawQuery();
+				if (queryString != null){
+					String[] params = queryString.split("&");
+					for (String param: params) {
+						String key = param.substring(0, param.indexOf('='));
+						if (key.equals(OS_DESTINATION_KEY)){
+							String val = param.substring(param.indexOf('=') + 1);
+							osDestination = java.net.URLDecoder.decode(val, "UTF-8");
+						}
+					}
+				}
+			}
+			catch (java.net.URISyntaxException ignored){
+			}
+		}
+
+		if (osDestination != null) {
+			request.getSession().setAttribute(OS_DESTINATION_KEY, osDestination);
 		}
 	}
 
@@ -159,12 +159,10 @@ public class SsoLoginServlet extends HttpServlet {
 		    	authUserMethod.setAccessible(true);
 		    	Boolean result = (Boolean)authUserMethod.invoke(authenticator, new Object[]{request, response, principal});
 
-				// If User has accessed specific protected URL, then we should honor that request.
-				// os_destination parameter will help us here to do exactly same!
 				if (result) {
-					if(request.getSession() != null && request.getSession().getAttribute("os_destination") != null) {
-						String os_destination = request.getSession().getAttribute("os_destination").toString();
-						response.sendRedirect(os_destination);
+					if(request.getSession() != null && request.getSession().getAttribute(OS_DESTINATION_KEY) != null) {
+						String os_destination = request.getSession().getAttribute(OS_DESTINATION_KEY).toString();
+						response.sendRedirect(saml2Config.getBaseUrl() + os_destination);
 					} else {
 						response.sendRedirect(saml2Config.getBaseUrl() + "/secure/Dashboard.jspa");
 					}
