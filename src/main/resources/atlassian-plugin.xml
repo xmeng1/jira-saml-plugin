@@ -50,12 +50,12 @@
     <url-pattern>/saml/logout</url-pattern>
   </servlet>
 
-  <servlet name="SAML 2 Config service Servlet" i18n-name-key="saml-config-servlet.name" key="saml-config-servlet" class="com.bitium.jira.servlet.ConfigAjaxServlet">
+  <servlet name="SAML 2 Config service Servlet" i18n-name-key="saml-config-servlet.name" key="saml-config-servlet" class="com.bitium.saml.servlet.ConfigAjaxServlet">
     <description key="saml-config-servlet.description">The SAML 2 Login Servlet Plugin</description>
     <url-pattern>/saml/getajaxconfig</url-pattern>
   </servlet>
 
-  <servlet-filter name="Saml2LoginFilter" key="saml2LoginFilter" location="before-login" class="com.bitium.jira.filter.LoginFilter" weight="0">
+  <servlet-filter name="Saml2LoginFilter" key="saml2LoginFilter" location="before-login" class="com.bitium.saml.filter.LoginFilter" weight="0">
     <description>Denies user non-SSO authentication if he tries to bypass login dialog.</description>
     <url-pattern>/dologin.action*</url-pattern>
     <dispatcher>REQUEST</dispatcher>
