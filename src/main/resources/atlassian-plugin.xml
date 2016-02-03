@@ -45,7 +45,7 @@
   </servlet>
   
   <!-- Logout servlet. Redirects a user to IDP and then logouts him  -->
-  <servlet name="SAML 2 Logout Servlet" i18n-name-key="saml-logout-servlet.name" key="saml-logout-servlet" class="com.bitium.jira.servlet.SsoLogoutServlet">
+  <servlet name="SAML 2 Logout Servlet" i18n-name-key="saml-logout-servlet.name" key="saml-logout-servlet" class="com.bitium.saml.servlet.SsoLogoutServlet">
     <description key="saml-logout-servlet.description">The SAML 2 Logout Servlet Plugin</description>
     <url-pattern>/saml/logout</url-pattern>
   </servlet>
