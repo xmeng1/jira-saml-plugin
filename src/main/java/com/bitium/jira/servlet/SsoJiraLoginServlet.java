@@ -1,8 +1,11 @@
 package com.bitium.jira.servlet;
 
+import com.atlassian.crowd.embedded.api.Group;
 import com.atlassian.jira.component.ComponentAccessor;
-import com.atlassian.jira.user.DelegatingApplicationUser;
-import com.atlassian.jira.user.util.UserUtil;
+import com.atlassian.jira.security.groups.GroupManager;
+import com.atlassian.jira.user.ApplicationUser;
+import com.atlassian.jira.user.UserDetails;
+import com.atlassian.jira.user.util.UserManager;
 import com.atlassian.seraph.auth.Authenticator;
 import com.atlassian.seraph.auth.DefaultAuthenticator;
 import com.atlassian.seraph.config.SecurityConfigFactory;
@@ -31,7 +34,7 @@ public class SsoJiraLoginServlet extends SsoLoginServlet {
 				userObject = tryCreateOrUpdateUser(username);
 			}
 
-		    if(userObject != null && userObject instanceof DelegatingApplicationUser) {
+		    if(userObject != null && userObject instanceof ApplicationUser) {
 		    	Boolean result = authoriseUserAndEstablishSession((DefaultAuthenticator) authenticator, userObject, request, response);
 
 				if (result) {
@@ -45,18 +48,28 @@ public class SsoJiraLoginServlet extends SsoLoginServlet {
 	}
 
 	@Override
-	protected Object tryCreateOrUpdateUser(String userName) throws Exception {
+	protected Object tryCreateOrUpdateUser(String username) throws Exception {
 		if (saml2Config.getAutoCreateUserFlag()){
-			UserUtil uu = ComponentAccessor.getUserUtil();
+			log.warn("Creating user account for " + username );
+
+			UserManager userManager = ComponentAccessor.getUserManager();
+
 			String fullName = credential.getAttributeAsString("cn");
 			String email = credential.getAttributeAsString("mail");
-			log.warn("Creating user account for " + userName );
-			uu.createUserNoNotification(userName, null, email, fullName);
-			// above returns api.User but we need ApplicationUser so search for it
-			return uu.getUserByName(userName);
+			UserDetails newUserDetails = new UserDetails(username, username).withEmail(email);
+			ApplicationUser newUser = userManager.createUser(newUserDetails);
+
+			GroupManager groupManager = ComponentAccessor.getGroupManager();
+			//TODO: Get default user group from plugin setting
+			Group defaultGroup = groupManager.getGroup("jira-users");
+			if (defaultGroup != null) {
+				groupManager.addUserToGroup(newUser, defaultGroup);
+			}
+
+			return newUser;
 		} else {
 			// not allowed to auto-create user
-			log.error("User not found and auto-create disabled: " + userName);
+			log.error("User not found and auto-create disabled: " + username);
 		}
 		return null;
 	}
