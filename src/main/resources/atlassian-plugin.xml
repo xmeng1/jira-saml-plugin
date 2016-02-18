@@ -26,9 +26,9 @@
     <context>atl.admin</context>
   </web-resource>
 
-  <web-item name="SAML 2.0 Configuration" i18n-name-key="saml2plugin.config" key="saml2plugin-config" section="top_system_section/mail_section" weight="150" application="jira">
-      <description key="saml2plugin.config">SAML 2.0 plugin Configuration</description>
-      <label key="saml2plugin.config">SAML 2.0 plugin Configuration</label>
+  <web-item name="SAML 2.0 Configuration" i18n-name-key="saml2plugin.config" key="saml2plugin-config" section="top_system_section/security_section" weight="150" application="jira">
+      <description key="saml2plugin.config">SAML 2.0 Plugin Configuration</description>
+      <label key="saml2plugin.config">SAML 2.0 Plugin Configuration</label>
       <link linkId="saml2plugin.config.link">/secure/admin/saml2pluginjira.configure.jspa</link>
   </web-item>
 

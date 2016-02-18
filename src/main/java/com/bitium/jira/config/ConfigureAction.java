@@ -2,7 +2,12 @@ package com.bitium.jira.config;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 
+import com.atlassian.crowd.embedded.api.Group;
+import com.atlassian.jira.component.ComponentAccessor;
+import com.atlassian.jira.security.groups.GroupManager;
 import org.apache.commons.lang.StringUtils;
 
 import com.atlassian.jira.web.action.JiraWebActionSupport;
@@ -16,13 +21,14 @@ public class ConfigureAction extends JiraWebActionSupport {
 	private String entityId;
 	private String uidAttribute;
 	private String autoCreateUser;
+    private String defaultAutoCreateUserGroup;
 	private String x509Certificate;
 	private String idpRequired;
 	private String success = "";
 	private String submitAction;
+	private ArrayList<String> existingGroups;
 
 	private SAMLJiraConfig saml2Config;
-
 
 	public void setSaml2Config(SAMLJiraConfig saml2Config) {
 		this.saml2Config = saml2Config;
@@ -71,7 +77,15 @@ public class ConfigureAction extends JiraWebActionSupport {
 		this.autoCreateUser = autoCreateUser;
 	}
 
-	public String getLogoutUrl() {
+    public String getDefaultAutoCreateUserGroup() {
+        return defaultAutoCreateUserGroup;
+    }
+
+    public void setDefaultAutoCreateUserGroup(String defaultAutoCreateUserGroup) {
+        this.defaultAutoCreateUserGroup = defaultAutoCreateUserGroup;
+    }
+
+    public String getLogoutUrl() {
 		return logoutUrl;
 	}
 
@@ -93,6 +107,21 @@ public class ConfigureAction extends JiraWebActionSupport {
 
 	public void setSuccess(String success) {
 		this.success = success;
+	}
+
+	public ArrayList<String> getExistingGroups() {
+        GroupManager groupManager = ComponentAccessor.getGroupManager();
+        Collection<Group> groupObjects = groupManager.getAllGroups();
+        existingGroups = new ArrayList<String>();
+        for (Group groupObject : groupObjects) {
+            existingGroups.add(groupObject.getName());
+        }
+        setExistingGroups(existingGroups);
+		return existingGroups;
+	}
+
+	public void setExistingGroups(ArrayList<String> existingGroups) {
+		this.existingGroups = existingGroups;
 	}
 
 	public String getSubmitAction() {
@@ -177,6 +206,14 @@ public class ConfigureAction extends JiraWebActionSupport {
 			} else {
 				setAutoCreateUser("false");
 			}
+
+			String defaultAutocreateUserGroup = saml2Config.getAutoCreateUserDefaultGroup();
+			if (defaultAutocreateUserGroup.isEmpty()) {
+				// NOTE: Set the default to "jira-users".
+				// This is used when configuring the plugin for the first time and no default was set
+				defaultAutocreateUserGroup = SAMLJiraConfig.DEFAULT_AUTOCREATE_USER_GROUP;
+			}
+			setDefaultAutoCreateUserGroup(defaultAutocreateUserGroup);
 			return "success";
 		}
 		saml2Config.setLoginUrl(getLoginUrl());
@@ -186,6 +223,7 @@ public class ConfigureAction extends JiraWebActionSupport {
 		saml2Config.setX509Certificate(getX509Certificate());
 		saml2Config.setIdpRequired(getIdpRequired());
 		saml2Config.setAutoCreateUser(getAutoCreateUser());
+        saml2Config.setAutoCreateUserDefaultGroup(getDefaultAutoCreateUserGroup());
 
 		setSuccess("success");
 		return "success";

@@ -1,6 +1,10 @@
 package com.bitium.jira.servlet;
 
 import com.atlassian.crowd.embedded.api.Group;
+import com.atlassian.crowd.exception.GroupNotFoundException;
+import com.atlassian.crowd.exception.OperationFailedException;
+import com.atlassian.crowd.exception.OperationNotPermittedException;
+import com.atlassian.crowd.exception.UserNotFoundException;
 import com.atlassian.jira.component.ComponentAccessor;
 import com.atlassian.jira.security.groups.GroupManager;
 import com.atlassian.jira.user.ApplicationUser;
@@ -9,6 +13,7 @@ import com.atlassian.jira.user.util.UserManager;
 import com.atlassian.seraph.auth.Authenticator;
 import com.atlassian.seraph.auth.DefaultAuthenticator;
 import com.atlassian.seraph.config.SecurityConfigFactory;
+import com.bitium.jira.config.SAMLJiraConfig;
 import com.bitium.saml.servlet.SsoLoginServlet;
 
 import javax.servlet.http.HttpServletRequest;
@@ -59,12 +64,7 @@ public class SsoJiraLoginServlet extends SsoLoginServlet {
 			UserDetails newUserDetails = new UserDetails(username, username).withEmail(email);
 			ApplicationUser newUser = userManager.createUser(newUserDetails);
 
-			GroupManager groupManager = ComponentAccessor.getGroupManager();
-			//TODO: Get default user group from plugin setting
-			Group defaultGroup = groupManager.getGroup("jira-users");
-			if (defaultGroup != null) {
-				groupManager.addUserToGroup(newUser, defaultGroup);
-			}
+			addUserToGroup(newUser);
 
 			return newUser;
 		} else {
@@ -72,6 +72,18 @@ public class SsoJiraLoginServlet extends SsoLoginServlet {
 			log.error("User not found and auto-create disabled: " + username);
 		}
 		return null;
+	}
+
+	private void addUserToGroup(ApplicationUser newUser) throws GroupNotFoundException, UserNotFoundException, OperationNotPermittedException, OperationFailedException {
+		GroupManager groupManager = ComponentAccessor.getGroupManager();
+		String defaultGroup = saml2Config.getAutoCreateUserDefaultGroup();
+		if (defaultGroup.isEmpty()) {
+            defaultGroup = SAMLJiraConfig.DEFAULT_AUTOCREATE_USER_GROUP;
+        }
+		Group defaultJiraGroup = groupManager.getGroup(defaultGroup);
+		if (defaultJiraGroup != null) {
+            groupManager.addUserToGroup(newUser, defaultJiraGroup);
+        }
 	}
 
 	@Override
