@@ -194,7 +194,7 @@ public class ConfigureAction extends JiraWebActionSupport {
 		}
 		
 		if(StringUtils.isBlank(getMaxAuthenticationAge()) || (!StringUtils.isNumeric(getMaxAuthenticationAge()))){
-			addActionError(getText("saml2Plugin.admin.maxAuthenticationAgeInvalid"));
+			addErrorMessage(getText("saml2Plugin.admin.maxAuthenticationAgeInvalid"));
 		}
 
 	}
