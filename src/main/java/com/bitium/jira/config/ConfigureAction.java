@@ -24,6 +24,7 @@ public class ConfigureAction extends JiraWebActionSupport {
     private String defaultAutoCreateUserGroup;
 	private String x509Certificate;
 	private String idpRequired;
+	private String maxAuthenticationAge;
 	private String success = "";
 	private String submitAction;
 	private ArrayList<String> existingGroups;
@@ -67,6 +68,14 @@ public class ConfigureAction extends JiraWebActionSupport {
 
 	public void setUidAttribute(String uidAttribute) {
 		this.uidAttribute = uidAttribute;
+	}
+	
+	public void setMaxAuthenticationAge(String maxAuthenticationAge) {
+		this.maxAuthenticationAge=maxAuthenticationAge;
+	}
+	
+	public String getMaxAuthenticationAge() {
+		return this.maxAuthenticationAge;
 	}
 
 	public String getAutoCreateUser() {
@@ -183,6 +192,10 @@ public class ConfigureAction extends JiraWebActionSupport {
 		} else {
 			setAutoCreateUser("true");
 		}
+		
+		if(StringUtils.isBlank(getMaxAuthenticationAge()) || (!StringUtils.isNumeric(getMaxAuthenticationAge()))){
+			addErrorMessage(getText("saml2Plugin.admin.maxAuthenticationAgeInvalid"));
+		}
 
 	}
 
@@ -206,7 +219,18 @@ public class ConfigureAction extends JiraWebActionSupport {
 			} else {
 				setAutoCreateUser("false");
 			}
-
+			
+			long maxAuthenticationAge = saml2Config.getMaxAuthenticationAge();
+			
+			//Default Value
+			if(maxAuthenticationAge==Long.MIN_VALUE){
+				setMaxAuthenticationAge("7200");
+			}
+			//Stored Value
+			else{
+				setMaxAuthenticationAge(String.valueOf(maxAuthenticationAge));
+			}
+			
 			String defaultAutocreateUserGroup = saml2Config.getAutoCreateUserDefaultGroup();
 			if (defaultAutocreateUserGroup.isEmpty()) {
 				// NOTE: Set the default to "jira-users".
@@ -224,7 +248,8 @@ public class ConfigureAction extends JiraWebActionSupport {
 		saml2Config.setIdpRequired(getIdpRequired());
 		saml2Config.setAutoCreateUser(getAutoCreateUser());
         saml2Config.setAutoCreateUserDefaultGroup(getDefaultAutoCreateUserGroup());
-
+        saml2Config.setMaxAuthenticationAge(Long.parseLong(getMaxAuthenticationAge()));
+        
 		setSuccess("success");
 		return "success";
 	}

@@ -59,11 +59,11 @@ Note: this assumes you have a JDK installed and configured. If not, look [here](
   This plugin is compatible with the [Bitium IdP](https://bitium.com) but other IdP's that support SAML 2.0 may also work. If you have success using it with another system please let us know so we can list that in the wiki.
 
 ## Contributing
-
+Submit your pull request to the [develop](https://github.com/bitium/jira-saml-plugin/tree/develop) branch. This allows us to merge your change into our internal master and then push out the change in the next release.
   1. Fork it
-  2. Create your feature branch (`git checkout -b my-new-feature`)
+  2. Create your feature branch (`git checkout -b feature/my-new-feature develop`)
   3. Commit your changes (`git commit -am 'Add some feature'`)
-  4. Push to the branch (`git push origin my-new-feature`)
+  4. Push to the branch (`git push origin feature/my-new-feature`)
   5. Create new Pull Request
 
 ## Licensing
