@@ -2,9 +2,13 @@
 All notable changes to this project will be documented in this file. [All Releases](https://github.com/bitium/jira-saml-plugin/releases)
 
 ## [Unreleased]
-### Changed
-- Fix for Force SSO used together with Secure Administrator Sessions
+### Proposed Changes
+- Fix for Force SSO used together with Secure Administration Sessions
 - Improved logging for SAML errors
+
+## [1.0.4] - 2016-10-25
+### Added
+- Max Authentication Age is now configurable
 
 ## [1.0.3] - 2016-02-18
 ### Added
@@ -21,5 +25,6 @@ All notable changes to this project will be documented in this file. [All Releas
 - Initial Release
 
 [unreleased]: https://github.com/bitium/jira-saml-plugin/tree/develop
+[1.0.4]: https://github.com/bitium/jira-saml-plugin/releases/tag/1.0.4
 [1.0.3]: https://github.com/bitium/jira-saml-plugin/releases/tag/1.0.3
 [1.0.1]: https://github.com/bitium/jira-saml-plugin/releases/tag/1.0.1
