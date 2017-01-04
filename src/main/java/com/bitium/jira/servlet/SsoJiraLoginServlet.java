@@ -88,7 +88,19 @@ public class SsoJiraLoginServlet extends SsoLoginServlet {
 
 	@Override
 	protected String getDashboardUrl() {
-		return saml2Config.getBaseUrl() + "/secure/Dashboard.jspa";
+		return saml2Config.getBaseUrl() + "/default.jsp";
+	}
+	
+	@Override
+	protected String filterRedirectUrl(String redirectUrl) {
+	    // Work around Jira issue with Dashboard redirects failing:
+	    // See: https://jira.atlassian.com/browse/JRA-63278
+	    if (redirectUrl.endsWith("/secure/Dashboard.jspa")) {
+	        return getDashboardUrl();
+	    }
+	    else {
+	        return redirectUrl;
+	    }
 	}
 
 	@Override
