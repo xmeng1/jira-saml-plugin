@@ -1,10 +1,9 @@
 # Change Log
 All notable changes to this project will be documented in this file. [All Releases](https://github.com/bitium/jira-saml-plugin/releases)
 
-## [Unreleased]
-### Proposed Changes
-- Fix for Force SSO used together with Secure Administration Sessions
-- Improved logging for SAML errors
+## [1.0.5] - 2016-04-28
+### Added
+- Fixed Dashboard redirect issue introduced in Jira 7.2.+ [JIRA Issue Tracker](https://jira.atlassian.com/browse/JRA-63278)
 
 ## [1.0.4] - 2016-10-25
 ### Added
@@ -24,7 +23,7 @@ All notable changes to this project will be documented in this file. [All Releas
 ### Added
 - Initial Release
 
-[unreleased]: https://github.com/bitium/jira-saml-plugin/tree/develop
+[1.0.5]: https://github.com/bitium/jira-saml-plugin/releases/tag/1.0.5
 [1.0.4]: https://github.com/bitium/jira-saml-plugin/releases/tag/1.0.4
 [1.0.3]: https://github.com/bitium/jira-saml-plugin/releases/tag/1.0.3
 [1.0.1]: https://github.com/bitium/jira-saml-plugin/releases/tag/1.0.1
