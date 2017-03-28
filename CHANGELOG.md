@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file. [All Releas
 ### Added
 - Max Authentication Age is now configurable
 
+## [1.0.4] - 2016-10-25
+### Added
+- Max Authentication Age is now configurable
+
 ## [1.0.3] - 2016-02-18
 ### Added
 - Refactored the logic for creating a session for SSO user
