@@ -19,6 +19,12 @@
                     <groupId>xerces</groupId>
                     <artifactId>xercesImpl</artifactId>
                 </exclusion>
+
+                    <exclusion>
+                        <groupId>jta</groupId>
+                        <artifactId>jta</artifactId>
+                    </exclusion>
+
             </exclusions>
         </dependency>
         <dependency>
@@ -111,8 +117,20 @@
             <version>1.8.5</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>javax.transaction</groupId>
+            <artifactId>jta</artifactId>
+            <version>1.0.1B</version>
+        </dependency>
+
     </dependencies>
     <repositories>
+        <repository>
+            <id>central</id>
+            <name>central</name>
+            <url>	http://central.maven.org/maven2/</url>
+        </repository>
         <repository>
             <id>spring-milestones</id>
             <name>Spring Milestones</name>
@@ -135,6 +153,23 @@
             </releases>
         </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>central</id>
+            <name>central</name>
+            <url>	http://central.maven.org/maven2/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>3rdparty</id>
+            <name>3rdparty</name>
+            <url>https://maven.atlassian.com/3rdparty/</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>atlassian-public2</id>
+            <url>https://maven.atlassian.com/content/repositories/atlassian-public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
     <build>
         <plugins>
             <plugin>
@@ -157,8 +192,10 @@
         </plugins>
     </build>
     <properties>
-        <jira.version>7.0.8</jira.version>
-        <amps.version>6.2.1</amps.version>
+        <!--<jira.version>7.0.8</jira.version>-->
+        <jira.version>7.1.0-QR20151229171111</jira.version>
+        <!--<amps.version>6.2.1</amps.version>-->
+        <amps.version>6.3.21</amps.version>
         <plugin.testrunner.version>1.2.3</plugin.testrunner.version>
         <!-- TestKit version 5.x for JIRA 5.x, 6.x for JIRA 6.x -->
         <testkit.version>6.3.11</testkit.version>
